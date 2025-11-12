@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prototype: Note Compilation Business Rules (DO-8574)</title>
-    <link rel="preconnect" href="https://ajax.googleapis.com">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
     <style>
         * {
@@ -26,7 +25,6 @@
             height: 100vh;
         }
 
-        /* Top Navigation */
         .top-nav {
             background: white;
             border-bottom: 1px solid #e4e4e7;
@@ -57,14 +55,12 @@
             border-bottom-color: #18181b;
         }
 
-        /* Main Layout */
         .main-layout {
             display: flex;
             flex: 1;
             overflow: hidden;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 240px;
             background: white;
@@ -94,7 +90,6 @@
             border-left-color: #18181b;
         }
 
-        /* Main Content */
         .content {
             flex: 1;
             overflow-y: auto;
@@ -116,7 +111,6 @@
             color: #71717a;
         }
 
-        /* Settings List */
         .settings-section {
             background: white;
             border: 1px solid #e4e4e7;
@@ -226,7 +220,6 @@
             background: #f4f4f5;
         }
 
-        /* Modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -328,13 +321,24 @@
             margin-bottom: 8px;
         }
 
-        .exception-row select {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #e4e4e7;
-            border-radius: 6px;
-            font-size: 14px;
-            background: white;
+        .exception-row.column {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .exception-row-top {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .exception-note-types-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #71717a;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .remove-btn {
@@ -427,7 +431,6 @@
             cursor: pointer;
         }
 
-        /* Searchable Dropdown */
         .search-dropdown {
             position: relative;
             flex: 1;
@@ -484,14 +487,10 @@
             font-size: 13px;
         }
     </style>
-    <meta name="view-transition" content="same-origin">
-    <meta name="author" content="Timothy Martens for ICANotes, LLC">
-    <meta name="description" content="Design Engineering">
 </head>
 
 <body ng-controller="MainCtrl as vm">
     <div class="container">
-        <!-- Top Navigation -->
         <nav class="top-nav">
             <button class="nav-tab" ng-class="{'active': vm.activeNav === 'practice-info'}" ng-click="vm.activeNav='practice-info'">Practice Information</button>
             <button class="nav-tab" ng-class="{'active': vm.activeNav === 'calendar'}" ng-click="vm.activeNav='calendar'">Calendar Settings</button>
@@ -503,24 +502,16 @@
             <button class="nav-tab" ng-class="{'active': vm.activeNav === 'note-settings'}" ng-click="vm.activeNav='note-settings'">Note Settings</button>
             <button class="nav-tab" ng-class="{'active': vm.activeNav === 'account'}" ng-click="vm.activeNav='account'">Account Management</button>
         </nav>
-
-        <!-- Main Layout -->
         <div class="main-layout">
-            <!-- Sidebar -->
             <aside class="sidebar">
-                <div class="sidebar-item" ng-class="{'active': vm.currentSectionKey === key}" ng-repeat="(key, s) in vm.sections" ng-click="vm.setSection(key)">
-                    {{ s.title }}
-                </div>
+                <div class="sidebar-item" ng-class="{'active': vm.currentSectionKey === key}" ng-repeat="(key, s) in vm.sections" ng-click="vm.setSection(key)">{{ s.title }}</div>
             </aside>
-
-            <!-- Main Content -->
             <main class="content">
                 <div class="content-header">
-                    <h1 id="section-title">{{ vm.sections[vm.currentSectionKey].title }}</h1>
-                    <p id="section-desc">{{ vm.sections[vm.currentSectionKey].desc }}</p>
+                    <h1>{{ vm.sections[vm.currentSectionKey].title }}</h1>
+                    <p>{{ vm.sections[vm.currentSectionKey].desc }}</p>
                 </div>
-
-                <div class="settings-section" id="settings-list">
+                <div class="settings-section">
                     <div class="setting-item" ng-repeat="setting in vm.sections[vm.currentSectionKey].settings">
                         <div class="setting-toggle">
                             <div class="toggle-switch" ng-class="{'active': setting.enabled}" ng-click="vm.toggleSetting(vm.currentSectionKey, setting.id)">
@@ -529,12 +520,10 @@
                         </div>
                         <div class="setting-content">
                             <div class="setting-label">{{ setting.label }}</div>
-
                             <div class="setting-exceptions" ng-if="setting.enabled && setting.exceptions && setting.exceptions.length">
                                 <span class="exception-badge" ng-class="{'staff-badge': ex.type === 'staff'}" ng-repeat="ex in setting.exceptions">⚠ {{ex.name}}{{ex.noteTypes && ex.noteTypes.length ? ': ' + ex.noteTypes.join(', ') : ''}}</span>
                                 <button class="manage-exceptions-btn" ng-click="vm.openExceptionModal(vm.currentSectionKey, setting.id)">Manage Exceptions</button>
                             </div>
-
                             <div class="setting-exceptions" ng-if="setting.enabled && (!setting.exceptions || !setting.exceptions.length)">
                                 <button class="manage-exceptions-btn" ng-click="vm.openExceptionModal(vm.currentSectionKey, setting.id)">Add Exceptions</button>
                             </div>
@@ -544,35 +533,27 @@
             </main>
         </div>
     </div>
-
-    <!-- Exception Management Modal -->
     <div class="modal-overlay" ng-class="{'active': vm.modalOpen}" ng-click="vm.overlayClick($event)">
         <div class="modal" ng-click="$event.stopPropagation()">
             <div class="modal-header">
-                <h2 id="modal-title">{{ vm.modalTitle }}</h2>
-                <p id="modal-subtitle">{{ vm.modalSubtitle }}</p>
+                <h2>{{ vm.modalTitle }}</h2>
+                <p>{{ vm.modalSubtitle }}</p>
             </div>
-
             <div class="modal-tabs">
                 <button class="modal-tab" ng-class="{'active': vm.activeModalTab === 'provider'}" ng-click="vm.activeModalTab='provider'">Provider Exceptions</button>
-                <button class="modal-tab" ng-class="{'active': vm.activeModalTab === 'staff'}" ng-click="vm.activeModalTab='staff'">Staff Exceptions</button>
+                <button class="modal-tab" ng-if="vm.allowStaffExceptions" ng-class="{'active': vm.activeModalTab === 'staff'}" ng-click="vm.activeModalTab='staff'">Staff Exceptions</button>
             </div>
-
-            <div class="modal-body" id="modal-body">
-                <!-- Provider Exceptions Tab -->
+            <div class="modal-body">
                 <div ng-if="vm.activeModalTab === 'provider'">
                     <div class="exception-group">
                         <div class="exception-group-title">Provider Exceptions</div>
-
-                        <div id="provider-exceptions">
-                            <div class="exception-row" ng-repeat="row in vm.modalProviderExceptions" style="flex-direction: column; align-items: stretch;">
-                                <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                        <div>
+                            <div class="exception-row column" ng-repeat="row in vm.modalProviderExceptions">
+                                <div class="exception-row-top">
                                     <div class="search-dropdown">
                                         <input type="text" placeholder="Search for provider..." ng-model="row.searchText" ng-focus="row.showDropdown = true" ng-blur="vm.hideDropdown(row, $event)" ng-change="vm.filterProviders(row)">
                                         <div class="dropdown-results" ng-if="row.showDropdown && row.filteredProviders.length">
-                                            <div class="dropdown-item" ng-repeat="p in row.filteredProviders" ng-class="{'selected': p === row.name}" ng-mousedown="vm.selectProvider(row, p)">
-                                                {{ p }}
-                                            </div>
+                                            <div class="dropdown-item" ng-repeat="p in row.filteredProviders" ng-class="{'selected': p === row.name}" ng-mousedown="vm.selectProvider(row, p)">{{ p }}</div>
                                         </div>
                                         <div class="dropdown-results" ng-if="row.showDropdown && !row.filteredProviders.length">
                                             <div class="dropdown-empty">No providers found</div>
@@ -580,39 +561,29 @@
                                     </div>
                                     <button class="remove-btn" ng-click="vm.removeProviderException($index)">Remove</button>
                                 </div>
-
                                 <div>
-                                    <div style="font-size: 12px; font-weight: 600; color: #71717a; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
-                                        Excluded Note Types for {{ row.name || 'Provider' }}
-                                    </div>
+                                    <div class="exception-note-types-label">Excluded Note Types for {{ row.name || 'Provider' }}</div>
                                     <div class="checkbox-group">
                                         <label class="checkbox-label" ng-repeat="nt in vm.noteTypes">
-                                            <input type="checkbox" ng-checked="row.noteTypes.indexOf(nt) !== -1" ng-click="vm.toggleNoteType(row, nt)">
-                                            {{ nt }}
+                                            <input type="checkbox" ng-checked="row.noteTypes.indexOf(nt) !== -1" ng-click="vm.toggleNoteType(row, nt)">{{ nt }}
                                         </label>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <button class="add-exception-btn" ng-click="vm.addProviderException()">+ Add Provider Exception</button>
                     </div>
                 </div>
-
-                <!-- Staff Exceptions Tab -->
                 <div ng-if="vm.activeModalTab === 'staff'">
                     <div class="exception-group">
                         <div class="exception-group-title">Staff Exceptions</div>
-
-                        <div id="staff-exceptions">
-                            <div class="exception-row" ng-repeat="row in vm.modalStaffExceptions" style="flex-direction: column; align-items: stretch;">
-                                <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                        <div>
+                            <div class="exception-row column" ng-repeat="row in vm.modalStaffExceptions">
+                                <div class="exception-row-top">
                                     <div class="search-dropdown">
                                         <input type="text" placeholder="Search for staff member..." ng-model="row.searchText" ng-focus="row.showDropdown = true" ng-blur="vm.hideDropdown(row, $event)" ng-change="vm.filterStaff(row)">
                                         <div class="dropdown-results" ng-if="row.showDropdown && row.filteredStaff.length">
-                                            <div class="dropdown-item" ng-repeat="s in row.filteredStaff" ng-class="{'selected': s === row.name}" ng-mousedown="vm.selectStaff(row, s)">
-                                                {{ s }}
-                                            </div>
+                                            <div class="dropdown-item" ng-repeat="s in row.filteredStaff" ng-class="{'selected': s === row.name}" ng-mousedown="vm.selectStaff(row, s)">{{ s }}</div>
                                         </div>
                                         <div class="dropdown-results" ng-if="row.showDropdown && !row.filteredStaff.length">
                                             <div class="dropdown-empty">No staff members found</div>
@@ -620,26 +591,20 @@
                                     </div>
                                     <button class="remove-btn" ng-click="vm.removeStaffException($index)">Remove</button>
                                 </div>
-
                                 <div>
-                                    <div style="font-size: 12px; font-weight: 600; color: #71717a; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
-                                        Excluded Note Types for {{ row.name || 'Staff Member' }}
-                                    </div>
+                                    <div class="exception-note-types-label">Excluded Note Types for {{ row.name || 'Staff Member' }}</div>
                                     <div class="checkbox-group">
                                         <label class="checkbox-label" ng-repeat="nt in vm.noteTypes">
-                                            <input type="checkbox" ng-checked="row.noteTypes.indexOf(nt) !== -1" ng-click="vm.toggleNoteType(row, nt)">
-                                            {{ nt }}
+                                            <input type="checkbox" ng-checked="row.noteTypes.indexOf(nt) !== -1" ng-click="vm.toggleNoteType(row, nt)">{{ nt }}
                                         </label>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <button class="add-exception-btn" ng-click="vm.addStaffException()">+ Add Staff Exception</button>
                     </div>
                 </div>
             </div>
-
             <div class="modal-footer">
                 <button class="btn btn-secondary" ng-click="vm.closeModal()">Cancel</button>
                 <button class="btn btn-primary" ng-click="vm.saveExceptions()">Save Changes</button>
@@ -647,303 +612,83 @@
         </div>
     </div>
     <script>
-        angular.module('practiceApp', [])
-            .controller('MainCtrl', ['$scope', function ($scope) {
-                const vm = this;
-
-                vm.activeNav = 'practice-requirements';
-
-                vm.noteTypes = [
-                    'ASAM',
-                    'Case Management',
-                    'Clinical Summary',
-                    'Complete Evaluation',
-                    'Couples/Family Therapy',
-                    'Discharge Summary',
-                    'Group Therapy Progress Note',
-                    'Primary Care Note',
-                    'Progress Note',
-                    'Quick Note',
-                    'SOAP Note'
-                ];
-
-                vm.providers = [
-                    'Dr. Wilson',
-                    'Dr. Trainer',
-                    'Dr. Johnson',
-                    'Dr. Smith',
-                    'Dr. Lee',
-                    'Dr. Martinez'
-                ];
-
-                vm.staff = [
-                    'Sarah Johnson',
-                    'Michael Chen',
-                    'Emily Rodriguez',
-                    'James Patterson',
-                    'Lisa Anderson',
-                    'David Thompson'
-                ];
-
-                vm.sections = {
-                    notes: {
-                        title: 'Clinical Notes',
-                        desc: 'Configure required fields for clinical notes and documentation',
-                        settings: [
-                            {
-                                id: 'diagnosis-code', label: 'Diagnosis Code', enabled: true, exceptions: [
-                                    { type: 'provider', name: 'Dr. Wilson', noteTypes: ['Quick Note'] },
-                                    { type: 'provider', name: 'Dr. Trainer', noteTypes: ['Quick Note', 'SOAP Note', 'ASAM'] },
-                                    { type: 'staff', name: 'Sarah Johnson', noteTypes: ['Quick Note', 'Progress Note'] }
-                                ]
-                            },
-                            { id: 'service-code', label: 'Service Code', enabled: true },
-                            { id: 'time-spent', label: 'Time Spent', enabled: true },
-                            { id: 'completed-tp', label: 'Completed Treatment Plan', enabled: false },
-                            { id: 'new-tp-overdue', label: 'New Treatment Plan if Overdue', enabled: true },
-                            { id: 'tp-to-create', label: 'Treatment Plan to Create', enabled: false },
-                            { id: 'icd10', label: 'ICD-10 (post 10/1/2015)', enabled: true },
-                            { id: 'justify-loc', label: 'Justify Level of Care', enabled: false },
-                            { id: 'custom-note-title', label: 'Custom Note Title', enabled: false }
-                        ]
-                    },
-                    assessments: {
-                        title: 'Assessments',
-                        desc: 'Configure required fields for clinical assessments',
-                        settings: [
-                            { id: 'mse-non-rx', label: 'MSE for Non-Rx Complete Assessments', enabled: true },
-                            { id: 'suicide-violence', label: 'Suicide/Violence Assessment', enabled: true, exceptions: [{ type: 'note-type', name: 'Quick Note' }] }
-                        ]
-                    },
-                    demographics: {
-                        title: 'Patient Demographics',
-                        desc: 'Configure required patient demographic information',
-                        settings: [
-                            { id: 'address', label: 'Address', enabled: true },
-                            { id: 'phone', label: 'Phone', enabled: true },
-                            { id: 'email', label: 'Email Address', enabled: false },
-                            { id: 'ssn', label: 'SSN', enabled: false },
-                            { id: 'ethnicity', label: 'Ethnicity', enabled: true },
-                            { id: 'race', label: 'Race', enabled: true },
-                            { id: 'marital-status', label: 'Marital Status', enabled: false },
-                            { id: 'disability', label: 'Disability', enabled: false },
-                            { id: 'family-size', label: 'Family Size', enabled: false },
-                            { id: 'employment', label: 'Employment Status', enabled: false },
-                            { id: 'income', label: 'Annual Household Income', enabled: false },
-                            { id: 'referred-by', label: 'Referred By', enabled: false },
-                            { id: 'emergency-contact', label: 'Emergency Contact', enabled: true }
-                        ]
-                    },
-                    insurance: {
-                        title: 'Insurance',
-                        desc: 'Configure required insurance information',
-                        settings: [
-                            { id: 'insurance-short-list', label: 'Insurance Short List', enabled: true },
-                            { id: 'coverage-details', label: 'Insurance Coverage Details', enabled: true },
-                            { id: 'medicaid-number', label: 'Medicaid Number', enabled: false }
-                        ]
-                    },
-                    medication: {
-                        title: 'Medication Management',
-                        desc: 'Configure required fields for medication management',
-                        settings: [
-                            { id: 'permission-rx', label: 'Permission to Add/Edit Rx', enabled: true },
-                            { id: 'med-consent', label: 'Medication Consent', enabled: true },
-                            { id: 'reason-prescribed', label: 'Reason Prescribed', enabled: true },
-                            { id: 'reason-vo', label: 'Reason Prescribed for Verbal Order', enabled: true }
-                        ]
-                    },
-                    scheduling: {
-                        title: 'Scheduling',
-                        desc: 'Configure required fields for scheduling and appointments',
-                        settings: [
-                            { id: 'follow-up', label: 'Follow Up', enabled: false },
-                            { id: 'location', label: 'Location in Calendar Events', enabled: true },
-                            { id: 'where-seen', label: 'Where Seen', enabled: true }
-                        ]
-                    }
-                };
-
-                vm.currentSectionKey = 'notes';
-
-                // Modal state
-                vm.modalOpen = false;
-                vm.modalTitle = '';
-                vm.modalSubtitle = '';
+        angular.module('practiceApp', []).controller('MainCtrl', ['$scope', function ($scope) {
+            var vm = this;
+            vm.activeNav = 'practice-requirements';
+            vm.allNoteTypes = {
+                'diagnosis-code': ['ASAM', 'Case Management', 'Complete Evaluation', 'Couples/Family Therapy', 'Primary Care Note', 'Progress Note', 'Quick Note', 'SOAP'],
+                'service-code': ['ASAM', 'Case Management', 'Complete Evaluation', 'Couples/Family Therapy', 'Primary Care Note', 'Progress Note', 'Quick Note', 'SOAP'],
+                'time-spent': ['ASAM', 'Case Management', 'Complete Evaluation', 'Couples/Family Therapy', 'Primary Care Note', 'Progress Note', 'SOAP']
+            };
+            vm.noteTypes = [];
+            vm.providers = ['Dr. Wilson', 'Dr. Trainer', 'Dr. Johnson', 'Dr. Smith', 'Dr. Lee', 'Dr. Martinez'];
+            vm.staff = ['Sarah Johnson', 'Michael Chen', 'Emily Rodriguez', 'James Patterson', 'Lisa Anderson', 'David Thompson'];
+            vm.sections = {
+                notes: {
+                    title: 'Clinical Notes', desc: 'Configure required fields for clinical notes and documentation', settings: [
+                        { id: 'diagnosis-code', label: 'Diagnosis Code', enabled: true, exceptions: [{ type: 'provider', name: 'Dr. Wilson', noteTypes: ['Quick Note'] }, { type: 'provider', name: 'Dr. Trainer', noteTypes: ['Quick Note', 'SOAP', 'ASAM'] }] },
+                        { id: 'service-code', label: 'Service Code', enabled: true, exceptions: [{ type: 'staff', name: 'Sarah Johnson', noteTypes: ['Quick Note', 'Progress Note'] }] },
+                        { id: 'time-spent', label: 'Time Spent', enabled: true, exceptions: [] },
+                        { id: 'completed-tp', label: 'Completed Treatment Plan', enabled: false },
+                        { id: 'new-tp-overdue', label: 'New Treatment Plan if Overdue', enabled: true },
+                        { id: 'tp-to-create', label: 'Treatment Plan to Create', enabled: false },
+                        { id: 'icd10', label: 'ICD-10 (post 10/1/2015)', enabled: true },
+                        { id: 'justify-loc', label: 'Justify Level of Care', enabled: false },
+                        { id: 'custom-note-title', label: 'Custom Note Title', enabled: false }
+                    ]
+                },
+                assessments: { title: 'Assessments', desc: 'Configure required fields for clinical assessments', settings: [{ id: 'mse-non-rx', label: 'MSE for Non-Rx Complete Assessments', enabled: true }, { id: 'suicide-violence', label: 'Suicide/Violence Assessment', enabled: true }] },
+                demographics: { title: 'Patient Demographics', desc: 'Configure required patient demographic information', settings: [{ id: 'address', label: 'Address', enabled: true }, { id: 'phone', label: 'Phone', enabled: true }, { id: 'email', label: 'Email Address', enabled: false }, { id: 'ssn', label: 'SSN', enabled: false }, { id: 'ethnicity', label: 'Ethnicity', enabled: true }, { id: 'race', label: 'Race', enabled: true }, { id: 'marital-status', label: 'Marital Status', enabled: false }, { id: 'disability', label: 'Disability', enabled: false }, { id: 'family-size', label: 'Family Size', enabled: false }, { id: 'employment', label: 'Employment Status', enabled: false }, { id: 'income', label: 'Annual Household Income', enabled: false }, { id: 'referred-by', label: 'Referred By', enabled: false }, { id: 'emergency-contact', label: 'Emergency Contact', enabled: true }] },
+                insurance: { title: 'Insurance', desc: 'Configure required insurance information', settings: [{ id: 'insurance-short-list', label: 'Insurance Short List', enabled: true }, { id: 'coverage-details', label: 'Insurance Coverage Details', enabled: true }, { id: 'medicaid-number', label: 'Medicaid Number', enabled: false }] },
+                medication: { title: 'Medication Management', desc: 'Configure required fields for medication management', settings: [{ id: 'permission-rx', label: 'Permission to Add/Edit Rx', enabled: true }, { id: 'med-consent', label: 'Medication Consent', enabled: true }, { id: 'reason-prescribed', label: 'Reason Prescribed', enabled: true }, { id: 'reason-vo', label: 'Reason Prescribed for Verbal Order', enabled: true }] },
+                scheduling: { title: 'Scheduling', desc: 'Configure required fields for scheduling and appointments', settings: [{ id: 'follow-up', label: 'Follow Up', enabled: false }, { id: 'location', label: 'Location in Calendar Events', enabled: true }, { id: 'where-seen', label: 'Where Seen', enabled: true }] }
+            };
+            vm.currentSectionKey = 'notes';
+            vm.modalOpen = false;
+            vm.modalTitle = '';
+            vm.modalSubtitle = '';
+            vm.activeModalTab = 'provider';
+            vm.modalProviderExceptions = [];
+            vm.modalStaffExceptions = [];
+            vm.currentSettingId = null;
+            vm.allowStaffExceptions = true;
+            vm.setSection = function (k) { vm.currentSectionKey = k; };
+            vm.toggleSetting = function (sk, sid) { var s = vm.sections[sk].settings.find(function (x) { return x.id === sid; }); s.enabled = !s.enabled; };
+            vm.openExceptionModal = function (sk, sid) {
+                vm.currentSectionKey = sk;
+                vm.currentSettingId = sid;
+                var s = vm.sections[sk].settings.find(function (x) { return x.id === sid; });
+                vm.modalTitle = 'Manage Exceptions: ' + s.label;
+                vm.modalSubtitle = 'Configure provider or staff exceptions';
+                vm.noteTypes = vm.allNoteTypes[sid] || [];
+                vm.allowStaffExceptions = sid !== 'diagnosis-code';
+                vm.modalProviderExceptions = (s.exceptions || []).filter(function (e) { return e.type === 'provider'; }).map(function (e) { return { type: 'provider', name: e.name || '', noteTypes: Array.isArray(e.noteTypes) ? e.noteTypes.slice() : [], searchText: e.name || '', showDropdown: false, filteredProviders: [] }; });
+                if (vm.allowStaffExceptions) { vm.modalStaffExceptions = (s.exceptions || []).filter(function (e) { return e.type === 'staff'; }).map(function (e) { return { type: 'staff', name: e.name || '', noteTypes: Array.isArray(e.noteTypes) ? e.noteTypes.slice() : [], searchText: e.name || '', showDropdown: false, filteredStaff: [] }; }); } else { vm.modalStaffExceptions = []; }
                 vm.activeModalTab = 'provider';
-                vm.modalProviderExceptions = [];
-                vm.modalStaffExceptions = [];
-                vm.currentSettingId = null;
-
-                vm.setSection = function (key) {
-                    vm.currentSectionKey = key;
-                };
-
-                vm.toggleSetting = function (sectionKey, settingId) {
-                    const setting = vm.sections[sectionKey].settings.find(s => s.id === settingId);
-                    setting.enabled = !setting.enabled;
-                };
-
-                vm.openExceptionModal = function (sectionKey, settingId) {
-                    vm.currentSectionKey = sectionKey;
-                    vm.currentSettingId = settingId;
-                    const setting = vm.sections[sectionKey].settings.find(s => s.id === settingId);
-                    vm.modalTitle = 'Manage Exceptions: ' + setting.label;
-                    vm.modalSubtitle = 'Configure provider or staff exceptions';
-
-                    // Prepare provider exceptions (deep copy to avoid mutating until saved)
-                    vm.modalProviderExceptions = (setting.exceptions || []).filter(e => e.type === 'provider').map(e => {
-                        return {
-                            type: 'provider',
-                            name: e.name || '',
-                            noteTypes: Array.isArray(e.noteTypes) ? e.noteTypes.slice() : [],
-                            searchText: e.name || '',
-                            showDropdown: false,
-                            filteredProviders: []
-                        };
-                    });
-
-                    // Prepare staff exceptions
-                    vm.modalStaffExceptions = (setting.exceptions || []).filter(e => e.type === 'staff').map(e => {
-                        return {
-                            type: 'staff',
-                            name: e.name || '',
-                            noteTypes: Array.isArray(e.noteTypes) ? e.noteTypes.slice() : [],
-                            searchText: e.name || '',
-                            showDropdown: false,
-                            filteredStaff: []
-                        };
-                    });
-
-                    vm.activeModalTab = 'provider';
-                    vm.modalOpen = true;
-                };
-
-                vm.addProviderException = function () {
-                    vm.modalProviderExceptions.push({
-                        type: 'provider',
-                        name: '',
-                        noteTypes: [],
-                        searchText: '',
-                        showDropdown: false,
-                        filteredProviders: []
-                    });
-                };
-
-                vm.removeProviderException = function (index) {
-                    vm.modalProviderExceptions.splice(index, 1);
-                };
-
-                vm.addStaffException = function () {
-                    vm.modalStaffExceptions.push({
-                        type: 'staff',
-                        name: '',
-                        noteTypes: [],
-                        searchText: '',
-                        showDropdown: false,
-                        filteredStaff: []
-                    });
-                };
-
-                vm.removeStaffException = function (index) {
-                    vm.modalStaffExceptions.splice(index, 1);
-                };
-
-                vm.toggleNoteType = function (row, nt) {
-                    const i = row.noteTypes.indexOf(nt);
-                    if (i === -1) row.noteTypes.push(nt);
-                    else row.noteTypes.splice(i, 1);
-                };
-
-                vm.filterProviders = function (row) {
-                    const search = (row.searchText || '').toLowerCase();
-                    if (!search) {
-                        row.filteredProviders = vm.providers.slice();
-                    } else {
-                        row.filteredProviders = vm.providers.filter(p =>
-                            p.toLowerCase().indexOf(search) !== -1
-                        );
-                    }
-                    row.showDropdown = true;
-                };
-
-                vm.filterStaff = function (row) {
-                    const search = (row.searchText || '').toLowerCase();
-                    if (!search) {
-                        row.filteredStaff = vm.staff.slice();
-                    } else {
-                        row.filteredStaff = vm.staff.filter(s =>
-                            s.toLowerCase().indexOf(search) !== -1
-                        );
-                    }
-                    row.showDropdown = true;
-                };
-
-                vm.selectProvider = function (row, provider) {
-                    row.name = provider;
-                    row.searchText = provider;
-                    row.showDropdown = false;
-                };
-
-                vm.selectStaff = function (row, staff) {
-                    row.name = staff;
-                    row.searchText = staff;
-                    row.showDropdown = false;
-                };
-
-                vm.hideDropdown = function (row, event) {
-                    // Delay hiding to allow click events to fire
-                    setTimeout(function () {
-                        row.showDropdown = false;
-                        $scope.$applyAsync();
-                    }, 200);
-                };
-
-                vm.closeModal = function () {
-                    vm.modalOpen = false;
-                };
-
-                vm.overlayClick = function (e) {
-                    // close when clicking overlay background
-                    if (e.target.classList && e.target.classList.contains('modal-overlay')) {
-                        vm.closeModal();
-                        $scope.$applyAsync();
-                    }
-                };
-
-                vm.saveExceptions = function () {
-                    const setting = vm.sections[vm.currentSectionKey].settings.find(s => s.id === vm.currentSettingId);
-
-                    // Save provider exceptions
-                    const providerExceptions = vm.modalProviderExceptions
-                        .filter(r => r.name && r.name.trim())
-                        .map(r => {
-                            return {
-                                type: 'provider',
-                                name: r.name.trim(),
-                                noteTypes: r.noteTypes && r.noteTypes.length ? r.noteTypes.slice() : []
-                            };
-                        });
-
-                    // Save staff exceptions
-                    const staffExceptions = vm.modalStaffExceptions
-                        .filter(r => r.name && r.name.trim())
-                        .map(r => {
-                            return {
-                                type: 'staff',
-                                name: r.name.trim(),
-                                noteTypes: r.noteTypes && r.noteTypes.length ? r.noteTypes.slice() : []
-                            };
-                        });
-
-                    // Combine both types of exceptions
-                    setting.exceptions = [...providerExceptions, ...staffExceptions];
-                    vm.modalOpen = false;
-                };
-
-                // initial scope apply (not strictly necessary)
-                $scope.vm = vm;
-            }]);
+                vm.modalOpen = true;
+            };
+            vm.addProviderException = function () { vm.modalProviderExceptions.push({ type: 'provider', name: '', noteTypes: [], searchText: '', showDropdown: false, filteredProviders: [] }); };
+            vm.removeProviderException = function (i) { vm.modalProviderExceptions.splice(i, 1); };
+            vm.addStaffException = function () { vm.modalStaffExceptions.push({ type: 'staff', name: '', noteTypes: [], searchText: '', showDropdown: false, filteredStaff: [] }); };
+            vm.removeStaffException = function (i) { vm.modalStaffExceptions.splice(i, 1); };
+            vm.toggleNoteType = function (r, nt) { var i = r.noteTypes.indexOf(nt); if (i === -1) r.noteTypes.push(nt); else r.noteTypes.splice(i, 1); };
+            vm.filterProviders = function (r) { var s = (r.searchText || '').toLowerCase(); if (!s) { r.filteredProviders = vm.providers.slice(); } else { r.filteredProviders = vm.providers.filter(function (p) { return p.toLowerCase().indexOf(s) !== -1; }); } r.showDropdown = true; };
+            vm.filterStaff = function (r) { var s = (r.searchText || '').toLowerCase(); if (!s) { r.filteredStaff = vm.staff.slice(); } else { r.filteredStaff = vm.staff.filter(function (st) { return st.toLowerCase().indexOf(s) !== -1; }); } r.showDropdown = true; };
+            vm.selectProvider = function (r, p) { r.name = p; r.searchText = p; r.showDropdown = false; };
+            vm.selectStaff = function (r, s) { r.name = s; r.searchText = s; r.showDropdown = false; };
+            vm.hideDropdown = function (r, e) { setTimeout(function () { r.showDropdown = false; $scope.$applyAsync(); }, 200); };
+            vm.closeModal = function () { vm.modalOpen = false; };
+            vm.overlayClick = function (e) { if (e.target.classList && e.target.classList.contains('modal-overlay')) { vm.closeModal(); $scope.$applyAsync(); } };
+            vm.saveExceptions = function () {
+                var s = vm.sections[vm.currentSectionKey].settings.find(function (x) { return x.id === vm.currentSettingId; });
+                var pe = vm.modalProviderExceptions.filter(function (r) { return r.name && r.name.trim(); }).map(function (r) { return { type: 'provider', name: r.name.trim(), noteTypes: r.noteTypes && r.noteTypes.length ? r.noteTypes.slice() : [] }; });
+                var se = [];
+                if (vm.allowStaffExceptions) { se = vm.modalStaffExceptions.filter(function (r) { return r.name && r.name.trim(); }).map(function (r) { return { type: 'staff', name: r.name.trim(), noteTypes: r.noteTypes && r.noteTypes.length ? r.noteTypes.slice() : [] }; }); }
+                s.exceptions = pe.concat(se);
+                vm.modalOpen = false;
+            };
+            $scope.vm = vm;
+        }]);
     </script>
 </body>
 
